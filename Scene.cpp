@@ -75,12 +75,13 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     sampleLight(lightInter, pdf_light);
     Vector3f lightDir = (lightInter.coords - inter.coords).normalized(); ///hitpoint->light
     Ray lightRay(inter.coords + inter.normal * EPSILON, lightDir);
+    float lightDis = (lightInter.coords - inter.coords).norm();
     Intersection shadowInter = intersect(lightRay);
-    if (shadowInter.happened && (shadowInter.coords - inter.coords).norm() < (lightInter.coords - inter.coords).norm()) {
+    if (shadowInter.happened && shadowInter.distance < lightDis-0.001) { ///?
         dir_light = {0., 0., 0.};
     } else {
         float invDis2 = 1.0f / dotProduct(lightInter.coords - inter.coords, lightInter.coords - inter.coords);
-        dir_light = lightInter.emit * inter.m->eval(-lightDir, -ray.direction, inter.normal) * std::max(0.f, dotProduct(inter.normal, -lightDir))
+        dir_light = lightInter.emit * inter.m->eval(-lightDir, -ray.direction, inter.normal) * std::max(0.f, dotProduct(inter.normal, lightDir))
          * invDis2 / pdf_light;
         ///a question: cwise product for color and BRDF?
     }
@@ -91,9 +92,10 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     Vector3f dir_indirect = {0., 0., 0.};
     Vector3f wi = inter.m->sample(ray.direction, inter.normal); ///hitpoint->wi
     Ray indirectRay(inter.coords + inter.normal * EPSILON, wi);
-    if(intersect(indirectRay).happened && !intersect(indirectRay).obj->hasEmit()) {
+    Intersection interIndirect = intersect(indirectRay);
+    if(interIndirect.happened && !interIndirect.obj->hasEmit()) {
         dir_indirect = castRay(indirectRay, depth + 1) * inter.m->eval(-wi, -ray.direction, inter.normal) * std::max(0.f, dotProduct(inter.normal, wi))
-         / inter.m->pdf(wi, -ray.direction, inter.normal) / RussianRoulette;
+         / inter.m->pdf(-wi, -ray.direction, inter.normal) / RussianRoulette;
     }
     return dir_light + dir_indirect;
 }
