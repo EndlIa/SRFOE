@@ -1,9 +1,4 @@
-//
-// Created by LEI XU on 5/16/19.
-//
-
-#ifndef RAYTRACING_MATERIAL_H
-#define RAYTRACING_MATERIAL_H
+#pragma once
 
 #include "Vector.hpp"
 
@@ -175,5 +170,3 @@ Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &
         }
     }
 }
-
-#endif //RAYTRACING_MATERIAL_H

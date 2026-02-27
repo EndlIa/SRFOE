@@ -1,8 +1,8 @@
 #pragma once
+
 #include <iostream>
 #include <cmath>
 #include <random>
-
 #undef M_PI
 #define M_PI 3.141592653589793f
 

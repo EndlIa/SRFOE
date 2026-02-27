@@ -2,8 +2,7 @@
 // Created by LEI XU on 5/16/19.
 //
 
-#ifndef RAYTRACING_INTERSECTION_H
-#define RAYTRACING_INTERSECTION_H
+#pragma once
 #include "Vector.hpp"
 #include "Material.hpp"
 class Object;
@@ -28,4 +27,3 @@ struct Intersection
     Object* obj;
     Material* m;
 };
-#endif //RAYTRACING_INTERSECTION_H

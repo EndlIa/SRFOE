@@ -4,6 +4,7 @@
 #include "Sphere.hpp"
 #include "Vector.hpp"
 #include "global.hpp"
+#include "Integrator.hpp"
 #include <chrono>
 
 // In the main function of the program, we create the scene (create objects and
@@ -41,7 +42,8 @@ int main(int argc, char** argv)
 
     scene.buildBVH();
 
-    Renderer r;
+    auto integ = std::make_shared<PathTracer>();
+    Renderer r(integ);
 
     auto start = std::chrono::system_clock::now();
     r.Render(scene);

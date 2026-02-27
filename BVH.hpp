@@ -2,8 +2,7 @@
 // Created by LEI XU on 5/16/19.
 //
 
-#ifndef RAYTRACING_BVH_H
-#define RAYTRACING_BVH_H
+#pragma once
 
 #include <atomic>
 #include <vector>
@@ -67,6 +66,3 @@ public:
 };
 
 
-
-
-#endif //RAYTRACING_BVH_H

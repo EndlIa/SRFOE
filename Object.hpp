@@ -1,9 +1,4 @@
-//
-// Created by LEI XU on 5/13/19.
-//
 #pragma once
-#ifndef RAYTRACING_OBJECT_H
-#define RAYTRACING_OBJECT_H
 
 #include "Vector.hpp"
 #include "global.hpp"
@@ -26,7 +21,3 @@ public:
     virtual void Sample(Intersection &pos, float &pdf)=0;
     virtual bool hasEmit()=0;
 };
-
-
-
-#endif //RAYTRACING_OBJECT_H

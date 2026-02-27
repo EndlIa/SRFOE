@@ -1,9 +1,6 @@
-//
-// Created by LEI XU on 5/13/19.
-//
 
-#ifndef RAYTRACING_SPHERE_H
-#define RAYTRACING_SPHERE_H
+
+#pragma once
 
 #include "Object.hpp"
 #include "Vector.hpp"
@@ -96,4 +93,3 @@ public:
 
 
 
-#endif //RAYTRACING_SPHERE_H
