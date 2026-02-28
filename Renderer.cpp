@@ -1,33 +1,30 @@
-//
-// Created by goksu on 2/25/20.
-//
 
 #include <fstream>
 #include <thread>   
 #include <mutex>
+#include <string>
 #include "Scene.hpp"
 #include "Renderer.hpp"
 #include "Integrator.hpp"
+#include "stb_image_write.hpp"
 
 inline float deg2rad(const float& deg) { return deg * M_PI / 180.0; }
 
 const float EPSILON = 0.000015;
 
-// The main render function. This where we iterate over all pixels in the image,
-// generate primary rays and cast these rays into the scene. The content of the
-// framebuffer is saved to a file.
 void Renderer::Render(const Scene& scene)
 {
-    std::vector<Vector3f> framebuffer(scene.width * scene.height);
+    width = scene.width;
+    height = scene.height;
+    framebuffer.assign(width * height, Vector3f(0.f));
 
     float scale = tan(deg2rad(scene.fov * 0.5));
     float imageAspectRatio = scene.width / (float)scene.height;
     Vector3f eye_pos(278, 273, -800);
 
-    // change the spp value to change sample ammount
     int spp = 50;
     int thread_bum = 8;
-    int rows_per_thread = scene.height / thread_bum;
+    int rows_per_thread = height / thread_bum;
     std::vector<std::thread> threads(thread_bum);
     std::mutex progress_mutex;
     float progress = 0.f;
@@ -61,16 +58,15 @@ void Renderer::Render(const Scene& scene)
         threads[i].join();
     }
     UpdateProgress(1.f);
+}
 
-    // save framebuffer to file
-    FILE* fp = fopen("testout.ppm", "wb");
-    (void)fprintf(fp, "P6\n%d %d\n255\n", scene.width, scene.height);
-    for (auto i = 0; i < scene.height * scene.width; ++i) {
-        static unsigned char color[3];
-        color[0] = (unsigned char)(255 * std::pow(clamp(0, 1, framebuffer[i].x), 0.6f));
-        color[1] = (unsigned char)(255 * std::pow(clamp(0, 1, framebuffer[i].y), 0.6f));
-        color[2] = (unsigned char)(255 * std::pow(clamp(0, 1, framebuffer[i].z), 0.6f));
-        fwrite(color, 1, 3, fp);
+void Renderer::SaveImage(const std::string& filename, float gamma) const
+{
+    std::vector<unsigned char> img(width * height * 3);
+    for (int i = 0; i < width * height; ++i) {
+        img[i * 3 + 0] = (unsigned char)(255 * std::pow(clamp(0, 1, framebuffer[i].x), gamma));
+        img[i * 3 + 1] = (unsigned char)(255 * std::pow(clamp(0, 1, framebuffer[i].y), gamma));
+        img[i * 3 + 2] = (unsigned char)(255 * std::pow(clamp(0, 1, framebuffer[i].z), gamma));
     }
-    fclose(fp);    
+    stbi_write_png(filename.c_str(), width, height, 3, img.data(), width * 3);
 }

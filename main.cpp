@@ -6,6 +6,8 @@
 #include "global.hpp"
 #include "Integrator.hpp"
 #include <chrono>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.hpp"
 
 // In the main function of the program, we create the scene (create objects and
 // lights) as well as set the options for the render (image width and height,
@@ -47,6 +49,7 @@ int main(int argc, char** argv)
 
     auto start = std::chrono::system_clock::now();
     r.Render(scene);
+    r.SaveImage("out.png");
     auto stop = std::chrono::system_clock::now();
 
     std::cout << "Render complete: \n";
