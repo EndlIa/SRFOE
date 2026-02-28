@@ -6,6 +6,7 @@
 #include "global.hpp"
 #include "Integrator.hpp"
 #include <chrono>
+#include "Instance.hpp"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.hpp"
 
@@ -35,12 +36,12 @@ int main(int argc, char** argv)
     MeshTriangle right("../models/cornellbox/right.obj", green);
     MeshTriangle light_("../models/cornellbox/light.obj", light);
 
-    scene.Add(&floor);
-    scene.Add(&shortbox);
-    scene.Add(&tallbox);
-    scene.Add(&left);
-    scene.Add(&right);
-    scene.Add(&light_);
+    scene.Add(Instance(&floor));
+    scene.Add(Instance(&shortbox));
+    scene.Add(Instance(&tallbox));
+    scene.Add(Instance(&left));
+    scene.Add(Instance(&right));
+    scene.Add(Instance(&light_));
 
     scene.buildBVH();
 

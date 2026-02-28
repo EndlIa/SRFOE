@@ -6,11 +6,11 @@
 
 #include <vector>
 #include "Vector.hpp"
-#include "Object.hpp"
 #include "Light.hpp"
 #include "AreaLight.hpp"
 #include "BVH.hpp"
 #include "Ray.hpp"
+#include "Instance.hpp"
 
 
 class Scene
@@ -25,7 +25,7 @@ public:
     Scene(int w, int h) : width(w), height(h)
     {}
 
-    void Add(Object *object) { objects.push_back(object); }
+    void Add(Instance instance) { objects.push_back(instance.obj); }
     void Add(std::unique_ptr<Light> light) { lights.push_back(std::move(light)); }
 
     const std::vector<Object*>& get_objects() const { return objects; }
