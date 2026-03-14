@@ -22,10 +22,6 @@ public:
         normal = normalize(crossProduct(e1, e2));
         area = crossProduct(e1, e2).norm()*0.5f;
     }
-
-    bool intersect(const Ray& ray) override;
-    bool intersect(const Ray& ray, float& tnear,
-                   uint32_t& index) const override;
     Intersection getIntersection(Ray ray) override;
     void getSurfaceProperties(const Vector3f& P, const Vector3f& I,
                               const uint32_t& index, const Vector2f& uv,
@@ -50,13 +46,6 @@ public:
         return m->hasEmission();
     }
 };
-
-inline bool Triangle::intersect(const Ray& ray) { return true; }
-inline bool Triangle::intersect(const Ray& ray, float& tnear,
-                                uint32_t& index) const
-{
-    return false;
-}
 
 inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 

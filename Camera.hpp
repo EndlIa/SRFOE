@@ -32,7 +32,6 @@ public:
 private:
     static float Deg2Rad(float deg)
     {
-        constexpr float pi = 3.14159265358979323846f;
-        return deg * pi / 180.0f;
+        return deg *  M_PI / 180.0f;
     }
 };
