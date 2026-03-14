@@ -1,6 +1,6 @@
 #include "Renderer.hpp"
 #include "Scene.hpp"
-#include "Triangle.hpp"
+#include "MeshTriangle.hpp"
 #include "Sphere.hpp"
 #include "Vector.hpp"
 #include "global.hpp"
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     white->Kd = Vector3f(0.725f, 0.71f, 0.68f);
     Material* light = new Material(DIFFUSE, (8.0f * Vector3f(0.747f+0.058f, 0.747f+0.258f, 0.747f) + 15.6f * Vector3f(0.740f+0.287f,0.740f+0.160f,0.740f) + 18.4f *Vector3f(0.737f+0.642f,0.737f+0.159f,0.737f)));
     light->Kd = Vector3f(0.65f);
-
+/*
     MeshTriangle floor("../models/cornellbox/floor.obj", white);
     MeshTriangle shortbox("../models/cornellbox/shortbox.obj", white);
     MeshTriangle tallbox("../models/cornellbox/tallbox.obj", white);
@@ -41,7 +41,9 @@ int main(int argc, char** argv)
     scene.Add(&left);
     scene.Add(&right);
     scene.Add(&light_);
-
+*/
+    MeshTriangle cake("../models/cake/a.obj", white);
+    scene.Add(&cake);
     scene.buildBVH();
 
     auto integ = std::make_shared<PathTracer>();
