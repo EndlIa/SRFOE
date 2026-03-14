@@ -108,6 +108,9 @@ public:
         return Vector4f(std::max(p1.x, p2.x), std::max(p1.y, p2.y),
                        std::max(p1.z, p2.z), std::max(p1.w, p2.w));
     }
+    Vector3f to3() const {
+        return (w == 0) ? Vector3f(x, y, z) : Vector3f(x / w, y / w, z / w);
+    }
 };
 
 inline Vector4f lerp(const Vector4f &a, const Vector4f& b, const float &t)

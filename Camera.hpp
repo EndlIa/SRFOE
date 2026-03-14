@@ -2,22 +2,26 @@
 
 #include <cstdint>
 #include <cmath>
+#include "Matrix.hpp"
 #include "Ray.hpp"
 
 class Camera
 {
 public:
-
-    Vector3f position;
+    Matrix4f CameraM;
     float fov;
-    Camera(const Vector3f& pos = Vector3f(278, 273, -800), float vfov = 40.0f)
-        : position(pos), fov(vfov)
-    {}
+    Camera(float vfov = 40.0f) : fov(vfov)
+    {
+        CameraM << 1, 0, 0, 278,
+                0, 1, 0, 273,
+                0, 0, 1, -800,
+                0, 0, 0, 1;
+    }
 
     Ray GenerateRay(uint32_t pixelX, uint32_t pixelY, uint32_t width, uint32_t height) const
     {
         Vector3f dir = GenerateDirection(pixelX, pixelY, width, height);
-        return Ray(position, dir);
+        return Ray(CameraM.col(3).to3(), dir);
     }
 
     Vector3f GenerateDirection(uint32_t pixelX, uint32_t pixelY, uint32_t width, uint32_t height) const

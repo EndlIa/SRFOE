@@ -58,4 +58,14 @@ public:
     Vector4f row(int i) const {
         return Vector4f(m[i], m[i + 4], m[i + 8], m[i + 12]);
     }
+
+    class MatrixInitializer {
+        Matrix4f& m;
+        int i = 0;
+        void set(float v) { if(i < 16) m.m[(i%4)*4 + i/4] = v; i++; }
+    public:
+        MatrixInitializer(Matrix4f& mat, float v) : m(mat) { set(v); }
+        MatrixInitializer& operator,(float v) { set(v); return *this; }
+    };
+    MatrixInitializer operator<<(float v) { return MatrixInitializer(*this, v); }
 };
