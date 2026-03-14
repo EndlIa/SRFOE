@@ -8,8 +8,6 @@
 #include "Integrator.hpp"
 #include "stb_image_write.hpp"
 
-inline float deg2rad(const float& deg) { return deg * M_PI / 180.0; }
-
 const float EPSILON = 0.000015;
 
 void Renderer::Render(const Scene& scene)
@@ -17,10 +15,6 @@ void Renderer::Render(const Scene& scene)
     width = scene.width;
     height = scene.height;
     framebuffer.assign(width * height, Vector3f(0.f));
-
-    float scale = tan(deg2rad(scene.fov * 0.5));
-    float imageAspectRatio = scene.width / (float)scene.height;
-    Vector3f eye_pos(278, 273, -800);
 
     int spp = 50;
     int thread_bum = 8;
@@ -35,14 +29,9 @@ void Renderer::Render(const Scene& scene)
     {
         for (uint32_t j = id * rows_per_thread; j < (id + 1) * rows_per_thread; ++j){
             for (uint32_t i = 0; i < scene.width; ++i){
-                // generate primary ray direction
-                float x = (2 * (i + 0.5) / (float)scene.width - 1) *
-                          imageAspectRatio * scale;
-                float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
-
-                Vector3f dir = normalize(Vector3f(-x, y, 1));
+                Ray primaryRay = scene.camera.GenerateRay(i, j, scene.width, scene.height);
                 for (int k = 0; k < spp; k++){
-                    framebuffer[j * scene.width + i] += integrator->Li(Ray(eye_pos, dir), scene, 0) / spp;
+                    framebuffer[j * scene.width + i] += integrator->Li(primaryRay, scene, 0) / spp;
                 }
             }
             progress_mutex.lock();

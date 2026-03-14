@@ -3,6 +3,7 @@
 #include "MeshTriangle.hpp"
 #include "Sphere.hpp"
 #include "Vector.hpp"
+#include "Camera.hpp"
 #include "global.hpp"
 #include "Integrator.hpp"
 #include <chrono>
@@ -17,7 +18,8 @@ int main(int argc, char** argv)
 {
 
     // Change the definition here to change resolution
-    Scene scene(1200, 1200);
+    Camera camera;
+    Scene scene(1200, 1200, camera);
 
     Material* red = new Material(DIFFUSE, Vector3f(0.0f));
     red->Kd = Vector3f(0.63f, 0.065f, 0.05f);
@@ -27,7 +29,7 @@ int main(int argc, char** argv)
     white->Kd = Vector3f(0.725f, 0.71f, 0.68f);
     Material* light = new Material(DIFFUSE, (8.0f * Vector3f(0.747f+0.058f, 0.747f+0.258f, 0.747f) + 15.6f * Vector3f(0.740f+0.287f,0.740f+0.160f,0.740f) + 18.4f *Vector3f(0.737f+0.642f,0.737f+0.159f,0.737f)));
     light->Kd = Vector3f(0.65f);
-/*
+
     MeshTriangle floor("../models/cornellbox/floor.obj", white);
     MeshTriangle shortbox("../models/cornellbox/shortbox.obj", white);
     MeshTriangle tallbox("../models/cornellbox/tallbox.obj", white);
@@ -41,10 +43,9 @@ int main(int argc, char** argv)
     scene.Add(&left);
     scene.Add(&right);
     scene.Add(&light_);
-*/
-    MeshTriangle cake("../models/cake/a.obj", white);
-    scene.Add(&cake);
+
     scene.buildBVH();
+
 
     auto integ = std::make_shared<PathTracer>();
     Renderer r(integ);
