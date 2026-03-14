@@ -22,7 +22,7 @@ Vector3f PathTracer::Li(const Ray &ray, const Scene &scene, int depth) const
         dir_light = {0., 0., 0.};
     } else {
         float invDis2 = 1.0f / dotProduct(lightInter.coords - inter.coords, lightInter.coords - inter.coords);
-        dir_light = lightInter.emit * inter.m->eval(-lightDir, -ray.direction, inter.normal) * std::max(0.f, dotProduct(inter.normal, lightDir)) * std::max(0.f, dotProduct(lightInter.normal, -lightDir))
+        dir_light = lightInter.emit.cwiseProduct(inter.m->eval(-lightDir, -ray.direction, inter.normal)) * std::max(0.f, dotProduct(inter.normal, lightDir)) * std::max(0.f, dotProduct(lightInter.normal, -lightDir))
          * invDis2 / pdf_light;
         ///a question: cwise product for color and BRDF?
     }
@@ -37,7 +37,7 @@ Vector3f PathTracer::Li(const Ray &ray, const Scene &scene, int depth) const
     if(interIndirect.happened && !interIndirect.obj->hasEmit()){
         float pdf_indirect = inter.m->pdf(-wi, -ray.direction, inter.normal);
         if (pdf_indirect > EPSILON){
-            dir_indirect = Li(indirectRay, scene, depth + 1) * inter.m->eval(-wi, -ray.direction, inter.normal) * std::max(0.f, dotProduct(inter.normal, wi))
+            dir_indirect = Li(indirectRay, scene, depth + 1).cwiseProduct(inter.m->eval(-wi, -ray.direction, inter.normal)) * std::max(0.f, dotProduct(inter.normal, wi))
              / pdf_indirect / RussianRoulette;
         }
     }
