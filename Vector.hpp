@@ -71,6 +71,62 @@ inline Vector3f crossProduct(const Vector3f &a, const Vector3f &b)
     );
 }
 
+class Vector4f {
+public:
+    float x, y, z, w;
+    Vector4f() : x(0), y(0), z(0), w(0) {}
+    Vector4f(float xx) : x(xx), y(xx), z(xx), w(xx) {}
+    Vector4f(float xx, float yy, float zz, float ww) : x(xx), y(yy), z(zz), w(ww) {}
+    Vector4f operator * (const float &r) const { return Vector4f(x * r, y * r, z * r, w * r); }
+    Vector4f operator / (const float &r) const { return Vector4f(x / r, y / r, z / r, w / r); }
+
+    float norm() const {return std::sqrt(x * x + y * y + z * z + w * w);}
+    Vector4f normalized() const {
+        float n = std::sqrt(x * x + y * y + z * z + w * w);
+        if (n <= std::numeric_limits<float>::epsilon()) {
+            return Vector4f(0.0f);
+        }
+        return Vector4f(x / n, y / n, z / n, w / n);
+    }
+
+    float operator * (const Vector4f &v) const { return x * v.x + y * v.y + z * v.z + w * v.w; }
+    Vector4f cwiseProduct(const Vector4f &v) const { return Vector4f(x * v.x, y * v.y, z * v.z, w * v.w); }
+    Vector4f operator - (const Vector4f &v) const { return Vector4f(x - v.x, y - v.y, z - v.z, w - v.w); }
+    Vector4f operator + (const Vector4f &v) const { return Vector4f(x + v.x, y + v.y, z + v.z, w + v.w); }
+    Vector4f operator - () const { return Vector4f(-x, -y, -z, -w); }
+    Vector4f& operator += (const Vector4f &v) { x += v.x, y += v.y, z += v.z, w += v.w; return *this; }
+    friend Vector4f operator * (const float &r, const Vector4f &v)
+    { return Vector4f(v.x * r, v.y * r, v.z * r, v.w * r); }
+    friend std::ostream & operator << (std::ostream &os, const Vector4f &v)
+    { return os << v.x << ", " << v.y << ", " << v.z << ", " << v.w; }
+    static Vector4f Min(const Vector4f &p1, const Vector4f &p2) {
+        return Vector4f(std::min(p1.x, p2.x), std::min(p1.y, p2.y),
+                       std::min(p1.z, p2.z), std::min(p1.w, p2.w));
+    }
+
+    static Vector4f Max(const Vector4f &p1, const Vector4f &p2) {
+        return Vector4f(std::max(p1.x, p2.x), std::max(p1.y, p2.y),
+                       std::max(p1.z, p2.z), std::max(p1.w, p2.w));
+    }
+};
+
+inline Vector4f lerp(const Vector4f &a, const Vector4f& b, const float &t)
+{ return a * (1 - t) + b * t; }
+
+inline Vector4f normalize(const Vector4f &v)
+{
+    return v.normalized();
+}
+
+inline Vector4f cwiseProduct(const Vector4f &a, const Vector4f &b)
+{
+    return a.cwiseProduct(b);
+}
+
+inline float dotProduct(const Vector4f &a, const Vector4f &b)
+{ return a * b; }
+
+
 class Vector2f
 {
 public:
