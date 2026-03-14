@@ -9,6 +9,11 @@
 extern const float  EPSILON;
 const float kInfinity = std::numeric_limits<float>::max();
 
+inline float Deg2Rad(float deg)
+{
+    return deg *  M_PI / 180.0f;
+}
+
 inline float clamp(const float &lo, const float &hi, const float &v)
 { return std::max(lo, std::min(hi, v)); }
 

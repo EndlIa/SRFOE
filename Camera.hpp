@@ -7,6 +7,9 @@
 class Camera
 {
 public:
+
+    Vector3f position;
+    float fov;
     Camera(const Vector3f& pos = Vector3f(278, 273, -800), float vfov = 40.0f)
         : position(pos), fov(vfov)
     {}
@@ -24,14 +27,5 @@ public:
         float x = (2 * (pixelX + 0.5f) / static_cast<float>(width) - 1) * imageAspectRatio * scale;
         float y = (1 - 2 * (pixelY + 0.5f) / static_cast<float>(height)) * scale;
         return normalize(Vector3f(-x, y, 1));
-    }
-
-    Vector3f position;
-    float fov;
-
-private:
-    static float Deg2Rad(float deg)
-    {
-        return deg *  M_PI / 180.0f;
     }
 };
