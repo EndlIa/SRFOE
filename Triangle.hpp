@@ -14,8 +14,10 @@ public:
     float area;
     Material* m;
 
-    Triangle(Vector3f _v0, Vector3f _v1, Vector3f _v2, Material* _m = nullptr)
-        : v0(_v0), v1(_v1), v2(_v2), m(_m)
+    Triangle(Vector3f _v0, Vector3f _v1, Vector3f _v2,
+             Vector3f _t0 = Vector3f(), Vector3f _t1 = Vector3f(), Vector3f _t2 = Vector3f(),
+             Material* _m = nullptr)
+        : v0(_v0), v1(_v1), v2(_v2), t0(_t0), t1(_t1), t2(_t2), m(_m)
     {
         e1 = v1 - v0;
         e2 = v2 - v0;
@@ -80,6 +82,8 @@ inline Intersection Triangle::getIntersection(Ray ray)
         inter.distance = t_tmp;
         inter.obj = this;
         inter.m = m;
+        // interpolate texture coordinates (u,v are barycentric for v1 and v2)
+        inter.tcoords = t0 * (1.0f - u - v) + t1 * u + t2 * v;
     }
     return inter;
 }

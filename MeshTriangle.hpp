@@ -6,6 +6,7 @@
 #include "OBJ_Loader.hpp"
 #include "Object.hpp"
 #include "Triangle.hpp"
+#include "Texture.hpp"
 #include <cassert>
 #include <limits>
 
@@ -49,6 +50,13 @@ public:
                                      mesh.Vertices[idx2].Position.Y,
                                      mesh.Vertices[idx2].Position.Z);
 
+            const auto vt0 = Vector3f(mesh.Vertices[idx0].TextureCoordinate.X,
+                                     mesh.Vertices[idx0].TextureCoordinate.Y, 0.0f);
+            const auto vt1 = Vector3f(mesh.Vertices[idx1].TextureCoordinate.X,
+                                     mesh.Vertices[idx1].TextureCoordinate.Y, 0.0f);
+            const auto vt2 = Vector3f(mesh.Vertices[idx2].TextureCoordinate.X,
+                                     mesh.Vertices[idx2].TextureCoordinate.Y, 0.0f);
+
             min_vert = Vector3f(std::min(min_vert.x, v0.x),
                                 std::min(min_vert.y, v0.y),
                                 std::min(min_vert.z, v0.z));
@@ -69,7 +77,7 @@ public:
                                 std::max(max_vert.y, v2.y),
                                 std::max(max_vert.z, v2.z));
 
-            triangles.emplace_back(v0, v1, v2, mt);
+            triangles.emplace_back(v0, v1, v2, vt0, vt1, vt2, mt);
             has_valid_triangle = true;
         }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector.hpp"
+#include "Texture.hpp"
 
 enum MaterialType { DIFFUSE, MIRROR };
 
@@ -86,6 +87,7 @@ public:
     Vector3f m_emission;
     float ior;
     Vector3f Kd, Ks;
+    Texture* tex;
     float specularExponent;
     //Texture tex;
 
@@ -109,6 +111,7 @@ Material::Material(MaterialType t, Vector3f e){
     m_type = t;
     //m_color = c;
     m_emission = e;
+    tex = nullptr;
 }
 
 MaterialType Material::getType(){return m_type;}
@@ -120,7 +123,8 @@ bool Material::hasEmission() {
 }
 
 Vector3f Material::getColorAt(double u, double v) {
-    return Vector3f();
+    if (tex) return tex->getColor(u, v);
+    return Kd;
 }
 
 
