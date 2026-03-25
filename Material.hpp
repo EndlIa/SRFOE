@@ -2,7 +2,7 @@
 
 #include "Vector.hpp"
 
-enum MaterialType { DIFFUSE};
+enum MaterialType { DIFFUSE, MIRROR };
 
 class Material{
 private:
@@ -129,12 +129,25 @@ Vector3f Material::sample(const Vector3f &wi, const Vector3f &N){
         case DIFFUSE:
         {
             // uniform sample on the hemisphere
-            float x_1 = get_random_float(), x_2 = get_random_float();
-            float z = std::fabs(1.0f - 2.0f * x_1);
-            float r = std::sqrt(1.0f - z * z), phi = 2 * M_PI * x_2;
-            Vector3f localRay(r*std::cos(phi), r*std::sin(phi), z);
+            float u1 = get_random_float(), u2 = get_random_float();
+            float phi = 2 * M_PI * u2;
+            float z = std::fabs(1.0f - 2.0f * u1);
+            float r = sqrtf(1.0f - z * z); 
+            Vector3f localRay(r*cosf(phi), r*sinf(phi), z);
             return toWorld(localRay, N);
             
+            break;
+        }
+        case MIRROR:
+        {
+            // Phong lobe sampling around perfect reflection direction
+            Vector3f R = reflect(wi, N);
+            float u1 = get_random_float(), u2 = get_random_float();
+            float phi = 2.0f * M_PI * u2;
+            float z = powf(u1, 1.0f / (specularExponent + 1.0f));
+            float r = sqrtf(std::max(0.0f, 1.0f - z * z));
+            Vector3f localRay(r * cosf(phi), r * sinf(phi), z);
+            return toWorld(localRay, R);
             break;
         }
     }
@@ -149,6 +162,17 @@ float Material::pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
                 return 0.5f / M_PI;
             else
                 return 0.0f;
+            break;
+        }
+        case MIRROR:
+        {
+            Vector3f R = reflect(wi, N);
+            float d = dotProduct(R, wo);
+            if (d > 0.0f) {
+                return (specularExponent + 1.0f) / (2.0f * M_PI) * powf(d, specularExponent);
+            } else {
+                return 0.0f;
+            }
             break;
         }
     }
@@ -166,6 +190,16 @@ Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &
             }
             else
                 return Vector3f(0.0f);
+            break;
+        }
+        case MIRROR:
+        {
+            // Phong specular BRDF (normalized)
+            if (dotProduct(N, wo) <= 0.0f) return Vector3f(0.0f);
+            Vector3f R = reflect(wi, N);
+            float d = std::max(0.0f, dotProduct(R, wo));
+            float factor = (specularExponent + 2.0f) / (2.0f * M_PI) * powf(d, specularExponent);
+            return Ks * factor;
             break;
         }
     }

@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 
     // Change the definition here to change resolution
     Camera camera;
-    Scene scene(1200, 1200, camera);
+    Scene scene(1200, 800, camera);
 
     Material* red = new Material(DIFFUSE, Vector3f(0.0f));
     red->Kd = Vector3f(0.63f, 0.065f, 0.05f);
@@ -27,23 +27,35 @@ int main(int argc, char** argv)
     green->Kd = Vector3f(0.14f, 0.45f, 0.091f);
     Material* white = new Material(DIFFUSE, Vector3f(0.0f));
     white->Kd = Vector3f(0.725f, 0.71f, 0.68f);
-    Material* light = new Material(DIFFUSE, (8.0f * Vector3f(0.747f+0.058f, 0.747f+0.258f, 0.747f) + 15.6f * Vector3f(0.740f+0.287f,0.740f+0.160f,0.740f) + 18.4f *Vector3f(0.737f+0.642f,0.737f+0.159f,0.737f)));
-    light->Kd = Vector3f(0.65f);
+    Material* light = new Material(DIFFUSE, Vector3f(20.0f, 8.0f, 1.0f));
+    light->Kd = Vector3f(0.8f); 
+    Material* mirror = new Material(MIRROR, Vector3f(0.0f));
+    mirror->Ks = Vector3f(0.9f);
+    mirror->specularExponent = 1000.0f;
+    
+    MeshTriangle c1("../model/c1.obj", light);
+    MeshTriangle c2("../model/c2.obj", light);
+    MeshTriangle c3("../model/c3.obj", light);
+    MeshTriangle c4("../model/c4.obj", light);
+    MeshTriangle cake("../model/cake.obj", white);
+    MeshTriangle candle("../model/candle.obj", white);
+    MeshTriangle fire("../model/fire.obj", light);
+    MeshTriangle floor("../model/floor.obj", white);
+    MeshTriangle m1("../model/mirror.001.obj", mirror);
+    MeshTriangle m2("../model/mirror.002.obj", mirror);
+    MeshTriangle m3("../model/mirror.obj", mirror);
 
-    MeshTriangle floor("../models/cornellbox/floor.obj", white);
-    MeshTriangle shortbox("../models/cornellbox/shortbox.obj", white);
-    MeshTriangle tallbox("../models/cornellbox/tallbox.obj", white);
-    MeshTriangle left("../models/cornellbox/left.obj", red);
-    MeshTriangle right("../models/cornellbox/right.obj", green);
-    MeshTriangle light_("../models/cornellbox/light.obj", light);
-
+    scene.Add(&c1);
+    scene.Add(&c2);
+    scene.Add(&c3);
+    scene.Add(&c4);
+    scene.Add(&cake);
+    scene.Add(&candle);
+    scene.Add(&fire);
     scene.Add(&floor);
-    scene.Add(&shortbox);
-    scene.Add(&tallbox);
-    scene.Add(&left);
-    scene.Add(&right);
-    scene.Add(&light_);
-
+    scene.Add(&m1);
+    scene.Add(&m2);
+    scene.Add(&m3);
     scene.buildBVH();
 
 
