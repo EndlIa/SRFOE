@@ -6,7 +6,7 @@
 #include "Scene.hpp"
 #include "Renderer.hpp"
 #include "Integrator.hpp"
-#include "stb_image_write.hpp"
+#include "stb_image_write.h"
 
 const float EPSILON = 0.000015;
 

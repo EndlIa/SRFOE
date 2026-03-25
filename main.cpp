@@ -8,7 +8,9 @@
 #include "Integrator.hpp"
 #include <chrono>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.hpp"
+#include "stb_image_write.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 // In the main function of the program, we create the scene (create objects and
 // lights) as well as set the options for the render (image width and height,
@@ -33,17 +35,17 @@ int main(int argc, char** argv)
     mirror->Ks = Vector3f(0.9f);
     mirror->specularExponent = 1000.0f;
     
-    MeshTriangle c1("../model/c1.obj", light);
-    MeshTriangle c2("../model/c2.obj", light);
-    MeshTriangle c3("../model/c3.obj", light);
-    MeshTriangle c4("../model/c4.obj", light);
-    MeshTriangle cake("../model/cake.obj", white);
-    MeshTriangle candle("../model/candle.obj", white);
-    MeshTriangle fire("../model/fire.obj", light);
-    MeshTriangle floor("../model/floor.obj", white);
-    MeshTriangle m1("../model/mirror.001.obj", mirror);
-    MeshTriangle m2("../model/mirror.002.obj", mirror);
-    MeshTriangle m3("../model/mirror.obj", mirror);
+    MeshTriangle c1("../models/c1.obj", light);
+    MeshTriangle c2("../models/c2.obj", light);
+    MeshTriangle c3("../models/c3.obj", light);
+    MeshTriangle c4("../models/c4.obj", light);
+    MeshTriangle cake("../models/cake.obj", white);
+    MeshTriangle candle("../models/candle.obj", white);
+    MeshTriangle fire("../models/fire.obj", light);
+    MeshTriangle floor("../models/floor.obj", white);
+    MeshTriangle m1("../models/mirror.001.obj", mirror);
+    MeshTriangle m2("../models/mirror.002.obj", mirror);
+    MeshTriangle m3("../models/mirror.obj", mirror);
 
     scene.Add(&c1);
     scene.Add(&c2);
