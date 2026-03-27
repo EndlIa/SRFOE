@@ -34,8 +34,10 @@ int main(int argc, char** argv)
     Material* mirror = new Material(MIRROR, Vector3f(0.0f));
     mirror->Ks = Vector3f(0.9f);
     mirror->specularExponent = 1000.0f;
+    Material* testTex = new Material(DIFFUSE, Vector3f(0.0f));
+    testTex->tex = new Texture("../assets/ttest/test.png");
     
-    MeshTriangle a123("../assets/ttest/test.obj", white);
+    MeshTriangle a123("../assets/ttest/test.obj", testTex);
 
 
     scene.Add(&a123);

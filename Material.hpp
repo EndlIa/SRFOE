@@ -103,7 +103,7 @@ public:
     // given a ray, calculate the PdF of this ray
     inline float pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N);
     // given a ray, calculate the contribution of this ray
-    inline Vector3f eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &N);
+    inline Vector3f eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &N, const Vector3f &tcoords);
 
 };
 
@@ -182,14 +182,15 @@ float Material::pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
     }
 }
 
-Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
+Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &N, const Vector3f &tcoords){
     switch(m_type){
         case DIFFUSE:
         {
             // calculate the contribution of diffuse   model
             float cosalpha = dotProduct(N, wo);
             if (cosalpha > 0.0f) {
-                Vector3f diffuse = Kd / M_PI;
+                Vector3f Kd_local = getColorAt(tcoords.x, tcoords.y);
+                Vector3f diffuse = Kd_local / M_PI;
                 return diffuse;
             }
             else
