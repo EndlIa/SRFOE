@@ -14,3 +14,10 @@ class PathTracer : public Integrator {
 public:
     Vector3f Li(const Ray &ray, const Scene &scene, int depth) const override;
 };
+
+class AmbientLight : public Integrator {
+public:
+    Vector3f ambientColor = Vector3f(0.2f);
+    AmbientLight(const Vector3f &ambient) : ambientColor(ambient) {}
+    Vector3f Li(const Ray &ray, const Scene &scene, int depth) const override;
+};

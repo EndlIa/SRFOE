@@ -35,33 +35,15 @@ int main(int argc, char** argv)
     mirror->Ks = Vector3f(0.9f);
     mirror->specularExponent = 1000.0f;
     
-    MeshTriangle c1("../model/c1.obj", light);
-    MeshTriangle c2("../model/c2.obj", light);
-    MeshTriangle c3("../model/c3.obj", light);
-    MeshTriangle c4("../model/c4.obj", light);
-    MeshTriangle cake("../model/cake.obj", white);
-    MeshTriangle candle("../model/candle.obj", white);
-    MeshTriangle fire("../model/fire.obj", light);
-    MeshTriangle floor("../model/floor.obj", white);
-    MeshTriangle m1("../model/mirror.001.obj", mirror);
-    MeshTriangle m2("../model/mirror.002.obj", mirror);
-    MeshTriangle m3("../model/mirror.obj", mirror);
+    MeshTriangle a123("../assets/ttest/test.obj", white);
 
-    scene.Add(&c1);
-    scene.Add(&c2);
-    scene.Add(&c3);
-    scene.Add(&c4);
-    scene.Add(&cake);
-    scene.Add(&candle);
-    scene.Add(&fire);
-    scene.Add(&floor);
-    scene.Add(&m1);
-    scene.Add(&m2);
-    scene.Add(&m3);
+
+    scene.Add(&a123);
+
     scene.buildBVH();
 
 
-    auto integ = std::make_shared<PathTracer>();
+    auto integ = std::make_shared<AmbientLight>(Vector3f(0.8f));
     Renderer r(integ);
 
     auto start = std::chrono::system_clock::now();
