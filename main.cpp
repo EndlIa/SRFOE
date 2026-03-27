@@ -1,7 +1,6 @@
 #include "Renderer.hpp"
 #include "Scene.hpp"
 #include "MeshTriangle.hpp"
-#include "Sphere.hpp"
 #include "Vector.hpp"
 #include "Camera.hpp"
 #include "global.hpp"
@@ -34,13 +33,15 @@ int main(int argc, char** argv)
     Material* mirror = new Material(MIRROR, Vector3f(0.0f));
     mirror->Ks = Vector3f(0.9f);
     mirror->specularExponent = 1000.0f;
-    Material* testTex = new Material(DIFFUSE, Vector3f(0.0f));
-    testTex->tex = new Texture("../assets/ttest/test.png");
-    
-    MeshTriangle a123("../assets/ttest/test.obj", testTex);
+    Material* cakeTex = new Material(DIFFUSE, Vector3f(0.0f));
+    cakeTex->tex = new Texture("../assets/cake/caketex.png");
 
-
-    scene.Add(&a123);
+    scene.Add(new MeshTriangle("../assets/cake/cake.obj", cakeTex));
+    scene.Add(new MeshTriangle("../assets/cake/floor.obj", white));
+    scene.Add(new MeshTriangle("../assets/cake/m1.obj", mirror));
+    scene.Add(new MeshTriangle("../assets/cake/m003.obj", mirror));
+    scene.Add(new MeshTriangle("../assets/cake/m3.obj", mirror));
+    scene.Add(new MeshTriangle("../assets/cake/toplight.obj", light));
 
     scene.buildBVH();
 
