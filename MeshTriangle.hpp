@@ -13,15 +13,11 @@
 class MeshTriangle : public Object
 {
 public:
-    MeshTriangle(const std::string& filename, Material* mt = new Material())
+    MeshTriangle(const objl::Mesh& mesh, Material* mt = new Material())
     {
-        objl::Loader loader;
-        loader.LoadFile(filename);
         area = 0;
         m = mt;
         bvh = nullptr;
-        assert(loader.LoadedMeshes.size() == 1);
-        auto mesh = loader.LoadedMeshes[0];
 
         Vector3f min_vert = Vector3f{std::numeric_limits<float>::infinity(),
                                      std::numeric_limits<float>::infinity(),

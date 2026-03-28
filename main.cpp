@@ -36,15 +36,25 @@ int main(int argc, char** argv)
     Material* cakeTex = new Material(DIFFUSE, Vector3f(0.0f));
     cakeTex->tex = new Texture("../assets/cake/caketex.png");
 
-    scene.Add(new MeshTriangle("../assets/cake/cake.obj", cakeTex));
-    scene.Add(new MeshTriangle("../assets/cake/floor.obj", white));
-    scene.Add(new MeshTriangle("../assets/cake/m1.obj", mirror));
-    scene.Add(new MeshTriangle("../assets/cake/m003.obj", mirror));
-    scene.Add(new MeshTriangle("../assets/cake/m3.obj", mirror));
-    scene.Add(new MeshTriangle("../assets/cake/toplight.obj", light));
+    auto addObj = [&](const std::string &path, Material* mat) {
+        objl::Loader loader;
+        if (!loader.LoadFile(path)) {
+            std::cerr << "Failed to load obj: " << path << std::endl;
+            return;
+        }
+        for (auto &mesh : loader.LoadedMeshes) {
+            scene.Add(new MeshTriangle(mesh, mat));
+        }
+    };
+
+    addObj("../assets/cake/cake.obj", cakeTex);
+    addObj("../assets/cake/floor.obj", white);
+    addObj("../assets/cake/m1.obj", mirror);
+    addObj("../assets/cake/test01.obj", mirror);
+    addObj("../assets/cake/m3.obj", mirror);
+    addObj("../assets/cake/toplight.obj", light);
 
     scene.buildBVH();
-
 
     auto integ = std::make_shared<AmbientLight>(Vector3f(0.8f));
     Renderer r(integ);
