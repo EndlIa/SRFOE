@@ -6,6 +6,7 @@
 #include "global.hpp"
 #include "Integrator.hpp"
 #include <chrono>
+#include <initializer_list>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -36,27 +37,35 @@ int main(int argc, char** argv)
     Material* cakeTex = new Material(DIFFUSE, Vector3f(0.0f));
     cakeTex->tex = new Texture("../assets/cake/caketex.png");
 
-    auto addObj = [&](const std::string &path, Material* mat) {
+    auto addObj = [&](const std::string &path, std::initializer_list<Material*> mats) {
         objl::Loader loader;
         if (!loader.LoadFile(path)) {
             std::cerr << "Failed to load obj: " << path << std::endl;
             return;
         }
+        std::vector<Material*> vm(mats);
+        size_t mi = 0;
         for (auto &mesh : loader.LoadedMeshes) {
+            Material* mat = nullptr;
+            if (!vm.empty()) {
+                if (mi < vm.size()) mat = vm[mi];
+                else mat = vm.back();
+            }
             scene.Add(new MeshTriangle(mesh, mat));
+            ++mi;
         }
     };
 
-    addObj("../assets/cake/cake.obj", cakeTex);
-    addObj("../assets/cake/floor.obj", white);
-    addObj("../assets/cake/m1.obj", mirror);
-    addObj("../assets/cake/test01.obj", mirror);
-    addObj("../assets/cake/m3.obj", mirror);
-    addObj("../assets/cake/toplight.obj", light);
+    addObj("../assets/cake/cake.obj", {cakeTex, light});
+    addObj("../assets/cake/floor.obj", {white});
+    addObj("../assets/cake/m1.obj", {mirror});
+    addObj("../assets/cake/test01.obj", {mirror});
+    addObj("../assets/cake/m3.obj", {mirror});
+    addObj("../assets/cake/toplight.obj", {light});
 
     scene.buildBVH();
 
-    auto integ = std::make_shared<AmbientLight>(Vector3f(0.8f));
+    auto integ = std::make_shared<PathTracer>();
     Renderer r(integ);
 
     auto start = std::chrono::system_clock::now();
