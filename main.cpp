@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
     scene.buildBVH();
 
-    auto integ = std::make_shared<AmbientLight>(Vector3f(0.3f));
+    auto integ = std::make_shared<AmbientLight>(Vector3f(0.8f));
     Renderer r(integ);
 
     auto start = std::chrono::system_clock::now();
