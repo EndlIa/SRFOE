@@ -35,7 +35,9 @@ int main(int argc, char** argv)
     mirror->Ks = Vector3f(0.9f);
     mirror->specularExponent = 1000.0f;
     Material* cakeTex = new Material(DIFFUSE, Vector3f(0.0f));
-    cakeTex->tex = new Texture("../assets/cake/caketex.png");
+    cakeTex->tex = new Texture("../assets/cake/caketex2048.png");
+    Material* candleTex = new Material(DIFFUSE, Vector3f(0.0f));
+    candleTex->tex = new Texture("../assets/cake/candletex256.png");
 
     auto addObj = [&](const std::string &path, std::initializer_list<Material*> mats) {
         objl::Loader loader;
@@ -56,16 +58,16 @@ int main(int argc, char** argv)
         }
     };
 
-    addObj("../assets/cake/cake.obj", {cakeTex, light});
+    addObj("../assets/cake/cake.obj", {cakeTex});
+    addObj("../assets/cake/candle.obj", {candleTex});
     addObj("../assets/cake/floor.obj", {white});
     addObj("../assets/cake/m1.obj", {mirror});
-    addObj("../assets/cake/test01.obj", {mirror});
-    addObj("../assets/cake/m3.obj", {mirror});
-    addObj("../assets/cake/toplight.obj", {light});
+    addObj("../assets/cake/sq1.obj", {mirror});
+    addObj("../assets/cake/m2.obj", {mirror});
 
     scene.buildBVH();
 
-    auto integ = std::make_shared<PathTracer>();
+    auto integ = std::make_shared<AmbientLight>(Vector3f(0.3f));
     Renderer r(integ);
 
     auto start = std::chrono::system_clock::now();
