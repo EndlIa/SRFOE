@@ -34,7 +34,7 @@ void Renderer::Render(const Scene& scene)
                 for (int k = 0; k < spp; k++){
                     framebuffer[j * scene.width + i] += integrator->Li(primaryRay, scene, 0) / spp;
                 }
-                framebuffer[j * scene.width + i] = Stylizer::CelShade(framebuffer[j * scene.width + i]);
+                framebuffer[j * scene.width + i] = Stylizer::Stylize(framebuffer[j * scene.width + i]);
             }
             progress_mutex.lock();
             progress += 1.f / scene.height;
