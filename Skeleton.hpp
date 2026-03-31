@@ -58,7 +58,7 @@ void addEdge(int a, int b){
     e.length = (verts[a].pos - verts[b].pos).norm();
     edges.push_back(e);
 };
-inline Chain buildSkeleton(const MeshTriangle &input)
+inline std::vector<Chain> buildSkeleton(const MeshTriangle &input)
 {
     for (auto &tri : input.triangles) {
         int i0 = addVert(tri.v0);
@@ -101,59 +101,159 @@ inline Chain buildSkeleton(const MeshTriangle &input)
         }
     }
 
-    // 4) 从剩下的“退化面”中提取线段（按 5A：提取非重复边并合并重复线段）
-    // 使用 set 存储无向边（排序的索引对）
-    struct PairHash { size_t operator()(const std::pair<int,int>&p) const noexcept { return std::hash<long long>()(((long long)p.first<<32) ^ (long long)p.second); } };
-    std::unordered_set<std::pair<int,int>, PairHash> segs;
-    for (auto &f : faces) {
-        // 如果是 regular 则跳过
-        if (isRegularFace(f)) continue;
-        // 考虑三条边，若边的两个端点仍然 active 且不相同，则加入
-        std::pair<int,int> e0 = {std::min(f.a,f.b), std::max(f.a,f.b)};
-        if (verts[f.a].active && verts[f.b].active && e0.first != e0.second) segs.insert(e0);
-        std::pair<int,int> e1 = {std::min(f.b,f.c), std::max(f.b,f.c)};
-        if (verts[f.b].active && verts[f.c].active && e1.first != e1.second) segs.insert(e1);
-        std::pair<int,int> e2 = {std::min(f.c,f.a), std::max(f.c,f.a)};
-        if (verts[f.c].active && verts[f.a].active && e2.first != e2.second) segs.insert(e2);
-    }
+        std::vector<Chain> out;
 
-    // 构建输出 objl::Mesh：按 5A 合并重复线段（segs 已去重）
-    Chain out;
-    std::vector<int> idx_map(verts.size(), -1);
-    for (auto &p : segs) {
-        int a = p.first, b = p.second;
-        if (idx_map[a] == -1) {
-            objl::Vertex v; v.Position = objl::Vector3(verts[a].pos.x, verts[a].pos.y, verts[a].pos.z);
-            v.Normal = objl::Vector3(0,0,0);
-            v.TextureCoordinate = objl::Vector2(0,0);
-            idx_map[a] = (int)out.Vertices.size();
-            out.Vertices.push_back(v);
+        // Build adjacency for active vertices
+        std::vector<std::vector<int>> adj(verts.size());
+        for (const auto &e : edges) {
+            if (e.a < 0 || e.b < 0 || e.a >= (int)verts.size() || e.b >= (int)verts.size()) continue;
+            if (!verts[e.a].active || !verts[e.b].active) continue;
+            if (e.a == e.b) continue;
+            adj[e.a].push_back(e.b);
+            adj[e.b].push_back(e.a);
         }
-        if (idx_map[b] == -1) {
-            objl::Vertex v; v.Position = objl::Vector3(verts[b].pos.x, verts[b].pos.y, verts[b].pos.z);
-            v.Normal = objl::Vector3(0,0,0);
-            v.TextureCoordinate = objl::Vector2(0,0);
-            idx_map[b] = (int)out.Vertices.size();
-            out.Vertices.push_back(v);
+
+        std::vector<char> visited(verts.size(), 0);
+
+        auto build_chain_from_endpoint = [&](int start)->Chain {
+            Chain chain;
+            int prev = -1;
+            int cur = start;
+            // follow until degree != 2 (stop at junction or end)
+            while (true) {
+                chain.points.push_back(verts[cur].pos);
+                visited[cur] = 1;
+                const auto &nbrs = adj[cur];
+                if (nbrs.size() == 0) break;
+                int next = -1;
+                for (int nb : nbrs) if (nb != prev) { next = nb; break; }
+                if (next == -1) break; // dead end
+                // if current is junction (degree != 2) and not start, stop after adding it
+                if (prev != -1 && adj[cur].size() != 2) break;
+                prev = cur;
+                cur = next;
+                if (visited[cur]) { // already visited neighbor, stop
+                    break;
+                }
+            }
+            return chain;
+        };
+
+        // 1) extract chains starting from endpoints (degree==1)
+        for (size_t i = 0; i < verts.size(); ++i) {
+            if (!verts[i].active) continue;
+            if (visited[i]) continue;
+            if (adj[i].size() == 1) {
+                Chain c = build_chain_from_endpoint((int)i);
+                if (!c.points.empty()) out.push_back(std::move(c));
+            }
         }
-        out.Indices.push_back(idx_map[a]);
-        out.Indices.push_back(idx_map[b]);
-    }
+
+        // 2) extract remaining cycles / components (no endpoints)
+        for (size_t i = 0; i < verts.size(); ++i) {
+            if (!verts[i].active) continue;
+            if (visited[i]) continue;
+            if (adj[i].empty()) { // isolated vertex
+                Chain c; c.points.push_back(verts[i].pos); visited[i] = 1; out.push_back(c); continue;
+            }
+            // walk a cycle/chain within the component
+            int prev = -1;
+            int cur = (int)i;
+            Chain c;
+            while (true) {
+                c.points.push_back(verts[cur].pos);
+                visited[cur] = 1;
+                int next = -1;
+                for (int nb : adj[cur]) if (nb != prev) { next = nb; break; }
+                if (next == -1) break;
+                prev = cur;
+                cur = next;
+                if (visited[cur]) break;
+            }
+            if (!c.points.empty()) out.push_back(std::move(c));
+        }
+
+        // compute lengths and sort from long to short
+        std::vector<std::pair<float, Chain>> tmp;
+        tmp.reserve(out.size());
+        for (auto &c : out) {
+            float len = 0.0f;
+            for (size_t k = 1; k < c.points.size(); ++k)
+                len += (c.points[k] - c.points[k-1]).norm();
+            tmp.emplace_back(len, std::move(c));
+        }
+        std::sort(tmp.begin(), tmp.end(), [](const auto &a, const auto &b){ return a.first > b.first; });
+        out.clear(); out.reserve(tmp.size());
+        for (auto &p : tmp) out.push_back(std::move(p.second));
+
+    
+
 
     return out;
 }
-struct Curve {
-    std::vector<Vector3f> points;    // 平滑后的点
-    std::vector<Vector3f> tangents;  // 每点切线（导数）→ 直接用于定义平面
-};
 
-Curve buildCurve(const Chain &chain) {
+Curve leastSquaresSpline(const Chain &chain, int samples = 3)
+{
     Curve curve;
-    Chain smoothed = laplacianSmooth(chain, 3); ///harcdoded 3
-    Curve spline = leastSquaresSpline(smoothed);
+    size_t pointCount = chain.points.size();
+
+    if (pointCount == 1) {
+        curve.points = chain.points;
+        curve.tangents.emplace_back(1, 0, 0); 
+        return curve;
+    }
+    if (pointCount < 4) {
+        for (size_t i = 0; i < pointCount - 1; ++i) {
+            Vector3f start = chain.points[i];
+            Vector3f end = chain.points[i + 1];
+            Vector3f dir = end - start;
+            Vector3f tanDir = dir.normalized();
+            int maxK = (i == pointCount - 2) ? (samples) : (samples - 1);
+            for (int k = 0; k <= maxK; ++k) {
+                float t = (float)k / (float)samples;
+                Vector3f pos = (1 - t) * start + t * end;
+                curve.points.push_back(pos);
+                curve.tangents.push_back(tanDir);
+            }
+        }
+        return curve;
+    }
+    Vector3f p0 = chain.points[0];
+    Vector3f p1 = chain.points[0];
+    Vector3f p2 = chain.points[1];
+    Vector3f p3 = chain.points[2];
+    Vector3f v0 = (p2 - p0) * 0.5f;
+    Vector3f firstTan = v0.normalized();
+    curve.points.push_back(p1);
+    curve.tangents.push_back(firstTan);
+
+    for (size_t i = 0; i < pointCount - 1; ++i) {
+        p0 = (i == 0) ? chain.points[0] : chain.points[i - 1];
+        p1 = chain.points[i];
+        p2 = chain.points[i + 1];
+        p3 = (i + 2 >= pointCount) ? chain.points.back() : chain.points[i + 2];
+        v0 = (p2 - p0) * 0.5f;
+        Vector3f v1 = (p3 - p1) * 0.5f;
+
+        for (int k = 1; k <= samples; ++k) {
+            float t = (float)k / (float)samples;
+            float t2 = t * t;
+            float t3 = t2 * t;
+
+            Vector3f pos = (2 * p1 - 2 * p2 + v0 + v1) * t3
+                         + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2
+                         + v0 * t + p1;
+
+            Vector3f tan = (6 * p1 - 6 * p2 + 3 * v0 + 3 * v1) * t2
+                         + (-6 * p1 + 6 * p2 - 4 * v0 - 2 * v1) * t
+                         + v0;
+
+            curve.points.push_back(pos);
+            curve.tangents.push_back(tan.normalized());
+        }
+    }
     return curve;
 }
-
 Chain laplacianSmooth(const Chain &chain, int iter) {
     Chain smoothed = chain;
     for (int k = 0; k < iter; ++k) {
@@ -163,7 +263,8 @@ Chain laplacianSmooth(const Chain &chain, int iter) {
     }
     return smoothed;
 }
-Curve leastSquaresSpline(const Chain &chain) {
-    Curve curve;
-    return curve;
+Curve buildCurve(const Chain &chain) {
+    Chain smoothed = laplacianSmooth(chain, 3); ///harcdoded 3
+    Curve spline = leastSquaresSpline(smoothed);
+    return spline;
 }
