@@ -14,7 +14,11 @@ const float EPS = 1e-6f;
 struct Vert { Vector3f pos; bool active = true; };
 struct Edge { int a, b; float length; };
 struct Face { int a, b, c; };
-
+struct Chain{ std::vector<Vector3f> points;};
+struct Curve {
+    std::vector<Vector3f> points;    // 平滑后的点
+    std::vector<Vector3f> tangents;  // 每点切线（导数）→ 直接用于定义平面
+};
 std::vector<Vert> verts;
 std::vector<Face> faces;
 std::vector<Edge> edges;
@@ -54,7 +58,7 @@ void addEdge(int a, int b){
     e.length = (verts[a].pos - verts[b].pos).norm();
     edges.push_back(e);
 };
-inline objl::Mesh buildSkeleton(const MeshTriangle &input)
+inline Chain buildSkeleton(const MeshTriangle &input)
 {
     for (auto &tri : input.triangles) {
         int i0 = addVert(tri.v0);
@@ -81,7 +85,6 @@ inline objl::Mesh buildSkeleton(const MeshTriangle &input)
         }
         if (!std::isfinite(min_len)) break;
 
-        // 坍缩 edge best_idx：合并 b 到 a（按 1A，保留 a 的坐标）
         int v_keep = edges[min_idx].a;
         int v_rem = edges[min_idx].b;
 
@@ -115,7 +118,7 @@ inline objl::Mesh buildSkeleton(const MeshTriangle &input)
     }
 
     // 构建输出 objl::Mesh：按 5A 合并重复线段（segs 已去重）
-    objl::Mesh out;
+    Chain out;
     std::vector<int> idx_map(verts.size(), -1);
     for (auto &p : segs) {
         int a = p.first, b = p.second;
@@ -138,4 +141,29 @@ inline objl::Mesh buildSkeleton(const MeshTriangle &input)
     }
 
     return out;
+}
+struct Curve {
+    std::vector<Vector3f> points;    // 平滑后的点
+    std::vector<Vector3f> tangents;  // 每点切线（导数）→ 直接用于定义平面
+};
+
+Curve buildCurve(const Chain &chain) {
+    Curve curve;
+    Chain smoothed = laplacianSmooth(chain, 3); ///harcdoded 3
+    Curve spline = leastSquaresSpline(smoothed);
+    return curve;
+}
+
+Chain laplacianSmooth(const Chain &chain, int iter) {
+    Chain smoothed = chain;
+    for (int k = 0; k < iter; ++k) {
+        for (size_t i = 1; i < smoothed.points.size()-1; ++i) {
+            smoothed.points[i] = (smoothed.points[i-1] + smoothed.points[i+1]) * 0.5f;
+        }
+    }
+    return smoothed;
+}
+Curve leastSquaresSpline(const Chain &chain) {
+    Curve curve;
+    return curve;
 }
