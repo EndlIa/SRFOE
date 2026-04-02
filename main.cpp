@@ -1,6 +1,7 @@
 #include "Renderer.hpp"
 #include "Scene.hpp"
 #include "MeshTriangle.hpp"
+#include "AreaLight.hpp"
 #include "Vector.hpp"
 #include "Camera.hpp"
 #include "global.hpp"
@@ -57,6 +58,14 @@ int main(int argc, char** argv)
             ++mi;
         }
     };
+    auto addLight = [&](const std::string &path, const Vector3f &emit) {
+        objl::Loader loader;
+        if (!loader.LoadFile(path)) {
+            std::cerr << "Failed to load obj: " << path << std::endl;
+            return;
+        }
+        scene.Add(std::make_unique<AreaLight>(loader.LoadedMeshes[0], emit));
+    };
 
     addObj("../assets/cake/cake.obj", {cakeTex});
     addObj("../assets/cake/candle.obj", {candleTex});
@@ -64,6 +73,7 @@ int main(int argc, char** argv)
     addObj("../assets/cake/m1.obj", {mirror});
     addObj("../assets/cake/sq1.obj", {mirror});
     addObj("../assets/cake/m2.obj", {mirror});
+    addLight("../assets/cake/lightbox.obj", Vector3f(7.0f, 2.8f, 0.7f));
 
     scene.buildBVH();
 

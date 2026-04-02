@@ -1,7 +1,3 @@
-//
-// Created by Göksu Güvendiren on 2019-05-14.
-//
-
 #include "Scene.hpp"
 
 
@@ -23,15 +19,34 @@ void Scene::sampleLight(Intersection &pos, float &pdf) const
             emit_area_sum += objects[k]->getArea();
         }
     }
+    for (uint32_t k = 0; k < lights.size(); ++k)
+        emit_area_sum += lights[k]->getArea();
+
+    if (emit_area_sum <= EPSILON) {
+        pdf = 0;
+        return;
+    }
+
+
     float p = get_random_float() * emit_area_sum;
-    emit_area_sum = 0;
+    float accum_area = 0;
+
     for (uint32_t k = 0; k < objects.size(); ++k) {
         if (objects[k]->hasEmit()){
-            emit_area_sum += objects[k]->getArea();
-            if (p <= emit_area_sum){
+            accum_area += objects[k]->getArea();
+            if (p <= accum_area){
                 objects[k]->Sample(pos, pdf);
-                break;
+                pdf = 1.0f / emit_area_sum;
+                return;
             }
+        }
+    }
+    for (uint32_t k = 0; k < lights.size(); ++k) {
+        accum_area += lights[k]->getArea();
+        if (p <= accum_area){
+            lights[k]->Sample(pos, pdf);
+            pdf = 1.0f / emit_area_sum;
+            return;
         }
     }
 }

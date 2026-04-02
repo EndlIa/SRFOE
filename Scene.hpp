@@ -8,7 +8,6 @@
 #include "Vector.hpp"
 #include "Object.hpp"
 #include "Light.hpp"
-#include "AreaLight.hpp"
 #include "BVH.hpp"
 #include "Ray.hpp"
 #include "Camera.hpp"
