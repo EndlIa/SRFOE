@@ -18,19 +18,21 @@ public:
      0.0,                   0.0,                  0.0,                  1.0;
     }
 
-    Ray GenerateRay(uint32_t px, uint32_t py, uint32_t width, uint32_t height) const
+    Ray GenerateRay(uint32_t px, uint32_t py, uint32_t width, uint32_t height,
+                    float jitterX, float jitterY) const
     {
-        Vector3f localDir = localDirection(px, py, width, height);
+        Vector3f localDir = localDirection(px, py, width, height, jitterX, jitterY);
         Vector4f worldDir = CameraM * Vector4f(localDir.x, localDir.y, localDir.z, 0);
         return Ray(CameraM.col(3).to3(), worldDir.to3().normalized());
     }
 
-    Vector3f localDirection(uint32_t px, uint32_t py, uint32_t width, uint32_t height) const
+    Vector3f localDirection(uint32_t px, uint32_t py, uint32_t width, uint32_t height,
+                            float jitterX = 0.5f, float jitterY = 0.5f) const
     {
         float scale = std::tan(Deg2Rad(fov * 0.5f));
         float imageAspectRatio = width / static_cast<float>(height);
-        float x = (2 * (px + 0.5f) / static_cast<float>(width) - 1) * imageAspectRatio * scale;
-        float y = (1 - 2 * (py + 0.5f) / static_cast<float>(height)) * scale;
+        float x = (2 * (px + jitterX) / static_cast<float>(width) - 1) * imageAspectRatio * scale;
+        float y = (1 - 2 * (py + jitterY) / static_cast<float>(height)) * scale;
         return normalize(Vector3f(x, y, -1));
     }
 };

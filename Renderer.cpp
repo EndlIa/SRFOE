@@ -29,8 +29,9 @@ void Renderer::Render(const Scene& scene)
     {
         for (uint32_t j = id * rows_per_thread; j < (id + 1) * rows_per_thread; ++j){
             for (uint32_t i = 0; i < scene.width; ++i){
-                Ray primaryRay = scene.camera.GenerateRay(i, j, scene.width, scene.height);
                 for (int k = 0; k < spp; k++){
+                    Ray primaryRay = scene.camera.GenerateRay(i, j, scene.width, scene.height,
+                                                              get_random_float(), get_random_float());
                     framebuffer[j * scene.width + i] += integrator->Li(primaryRay, scene, 0) / spp;
                 }
             }
